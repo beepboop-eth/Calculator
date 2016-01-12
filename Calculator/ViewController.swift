@@ -10,16 +10,63 @@ import UIKit
 
 class ViewController: UIViewController {
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-    }
+    @IBOutlet weak var display: UILabel! //implicitly unwrapped optional
+    
+    var userIsInTheMiddleOfTypingANumber = false
+    
+    var brain = CalculatorBrain()
+   
+ 
+    @IBAction func appendDigit(sender: UIButton) {
+        let digit = sender.currentTitle!
+        let range = display.text!.rangeOfString(".")
+        if(range == nil || range?.startIndex > display.text!.endIndex || digit != ".")
+        {
+    
+            if userIsInTheMiddleOfTypingANumber {
+                display.text! +=  digit
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
+            }
+            else {
+                display.text = digit
+                userIsInTheMiddleOfTypingANumber = true
+            }
+        }
 
+    }
+    @IBAction func operate(sender: UIButton) {
+       
+        if userIsInTheMiddleOfTypingANumber {
+            enter()
+        }
+        if let operation = sender.currentTitle {
+            if let result = brain.performOperation(operation) {
+                displayValue = result
+            } else {
+                displayValue = 0 //lame
+            }
+        }
+    }
+    @IBAction func enter() {
+        userIsInTheMiddleOfTypingANumber = false
+        if let result = brain.pushOperand(displayValue) {
+            displayValue = result
+        } else {
+            displayValue = 0 //lame
+        }
+        
+        
+    }
+    var displayValue: Double {
+        get{
+            return NSNumberFormatter().numberFromString(display.text!)!.doubleValue //look up
+            
+        }
+        set{
+            display.text = "\(newValue)" //converts Double string
+            userIsInTheMiddleOfTypingANumber = false
+        }
+    }
 
 }
 

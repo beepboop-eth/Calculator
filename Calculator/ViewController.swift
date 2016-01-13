@@ -10,6 +10,7 @@ import UIKit
 
 class ViewController: UIViewController {
 
+    @IBOutlet weak var history: UILabel!
     @IBOutlet weak var display: UILabel! //implicitly unwrapped optional
     
     var userIsInTheMiddleOfTypingANumber = false
@@ -33,6 +34,12 @@ class ViewController: UIViewController {
             }
         }
 
+    }
+    @IBAction func clearStack(sender: UIButton) {
+        brain.deleteStack()
+        display.text = "0"
+        history.text = "Nothing to show"
+        
     }
     @IBAction func operate(sender: UIButton) {
        
@@ -65,6 +72,7 @@ class ViewController: UIViewController {
         set{
             display.text = "\(newValue)" //converts Double string
             userIsInTheMiddleOfTypingANumber = false
+            history.text = brain.showStack()
         }
     }
 

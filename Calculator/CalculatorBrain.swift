@@ -3,9 +3,13 @@ import Foundation
 
 class CalculatorBrain
 {
+    /* Enum that can either be an operand or an operation
+    Uses Printable protocol, which allows this enum print a value based on what kind of Op it is
+    */
     private enum Op: Printable
     {
         case Operand(Double)
+        case NullaryOperation(String, () -> Double)
         case UnaryOperation(String, Double -> Double)
         case BinaryOperation(String, (Double, Double) -> Double)
         
@@ -14,6 +18,8 @@ class CalculatorBrain
                 switch self {
                 case .Operand(let operand):
                     return "\(operand)"
+                case .NullaryOperation(let symbol, _):
+                    return symbol
                 case .UnaryOperation(let symbol, _):
                     return symbol
                 case .BinaryOperation(let symbol, _):
@@ -22,9 +28,12 @@ class CalculatorBrain
             }
         }
     }
+    func showStack() -> String? {
+        return " ".join(opStack.map{"\($0)"})
+    }
     
     //var opStack = Array<Op>()
-    private var opStack = [Op]()
+    private var opStack = [Op]() //creates an array of Ops
     
     //var knownOps = Dictionary<String, Op>()
     private var knownOps = [String:Op]()
@@ -35,7 +44,10 @@ class CalculatorBrain
         }
         //knownOps["×"] = Op.BinaryOperation("×") { $0 * $1 }
         //knownOps["×"] = Op.BinaryOperation("×", *)
-        learnOp(Op.BinaryOperation("×", *))
+        learnOp(Op.BinaryOperation("✕", *))
+        learnOp(Op.UnaryOperation("sin", {sin($0)}))
+        learnOp(Op.UnaryOperation("cos", {cos($0)}))
+        learnOp(Op.NullaryOperation("π", {M_PI}))
         knownOps["÷"] = Op.BinaryOperation("÷") { $1 / $0 }
         //knownOps["+"] = Op.BinaryOperation("+") { $0 + $1 }
         knownOps["+"] = Op.BinaryOperation("+", +)
@@ -51,6 +63,8 @@ class CalculatorBrain
             switch op {
             case .Operand(let operand):
                 return (operand, remainingOps)
+            case .NullaryOperation(_, let constant):
+                return (constant(), remainingOps)
             case .UnaryOperation(_, let operation):
                 let operandEvaluation = evaluate(remainingOps)
                 if let operand = operandEvaluation.result {
@@ -64,6 +78,9 @@ class CalculatorBrain
                         return (operation(operand1, operand2), op2Evaluation.remainingOps)
                     }
                 }
+         
+
+             
             }
         }
         return (nil, ops)
@@ -86,5 +103,8 @@ class CalculatorBrain
             opStack.append(operation);
         }
         return evaluate()
+    }
+    func deleteStack() {
+        opStack.removeAll()
     }
 }
